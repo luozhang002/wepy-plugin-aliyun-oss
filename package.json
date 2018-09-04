@@ -1,8 +1,12 @@
 {
   "name": "wepy-plugin-aliyun-oss",
-  "version": "0.2.2",
+  "version": "0.2.5",
   "description": "upload wepy resources to aliyun oss",
   "main": "lib/index.js",
+  "files": [
+    "lib/utils/index.js",
+    "lib/driver/oss/index.js"
+  ],
   "scripts": {
     "build": "babel src/ --out-dir lib/",
     "watch-compile": "npm run build -- --watch",
