@@ -34,7 +34,7 @@ export default class CloudStorage {
       console.log("lessRootpath", lessRootpath);
     }
 
-    const reg = /url\((.*?)\)/gi;
+    const reg = /\/assets\S+(.png|jpeg)/gi;
     if (!code) {
       if (debugMode) {
         console.error("code is null");
@@ -68,7 +68,7 @@ export default class CloudStorage {
         }
 
         if (!fs.existsSync(bgPath)) {
-          bgPath = path.join(process.cwd(), "src", bgImage);
+          bgPath = path.join(process.cwd(), bgImage);
         }
 
         // less使用e('')传递的路径
@@ -105,6 +105,7 @@ export default class CloudStorage {
             _this.driver
               .uploader(uploadfile.bg, uploadfile.path)
               .then(res => {
+                const image = uploadfile.bg;
                 !_this.options.config.debugMode ||
                   Utils.success(res.original, "上传到CDN响应数据");
 
@@ -114,24 +115,22 @@ export default class CloudStorage {
 
                 Utils.success(image + " ----> " + newUrl, "上传到CDN成功");
 
-                !_this.options.config.delDistImg ||
-                  fs.unlink(path.join(process.cwd(), "dist", image), err => {
-                    if (_this.options.config.debugMode && err) {
-                      Utils.warn(err, "删除dist图片");
-                    }
+                // !_this.options.config.delDistImg ||
+                //   fs.unlink(path.join(process.cwd(), "dist", image), err => {
+                //     if (_this.options.config.debugMode && err) {
+                //       Utils.warn(err, "删除dist图片");
+                //     }
 
-                    err || Utils.success(image, "删除dist图片成功");
-                  });
-                resolve([
-                  {
-                    ...uploadfile,
-                    uploadUrl: newUrl
-                  }
-                ]);
+                //     err || Utils.success(image, "删除dist图片成功");
+                //   });
+                resolve({
+                  ...uploadfile,
+                  uploadUrl: newUrl
+                });
               })
               .catch(e => {
                 Utils.error(e, "上传到CDN失败");
-                resolve([]);
+                resolve({});
               });
           })
         );
@@ -148,8 +147,11 @@ export default class CloudStorage {
         .then(resultList => {
           console.log(resultList, "result");
           resultList.forEach(item => {
-            const bgUrl = item.options.bg;
-            const uploadUrl = item.url.replace("http://", "https://");
+            const bgUrl = item.bg;
+            const uploadUrl = (item.uploadUrl || "").replace(
+              "http://",
+              "https://"
+            );
             console.log(bgUrl, uploadUrl);
             op.code = op.code.replace(bgUrl, uploadUrl);
           });

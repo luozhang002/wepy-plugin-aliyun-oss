@@ -1,6 +1,6 @@
 {
   "name": "wepy-plugin-aliyun-oss",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "upload wepy resources to aliyun oss",
   "main": "lib/index.js",
   "files": [
