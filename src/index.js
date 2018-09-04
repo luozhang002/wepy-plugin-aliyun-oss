@@ -103,7 +103,7 @@ export default class CloudStorage {
         promiseUploadList.push(
           new Promise(resolve => {
             _this.driver
-              .uploader(uploadfile.bg, uploadfile.path)
+              .uploader(uploadfile.bg.replace(/\//, ""), uploadfile.path)
               .then(res => {
                 const image = uploadfile.bg;
                 !_this.options.config.debugMode ||
