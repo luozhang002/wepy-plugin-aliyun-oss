@@ -1683,6 +1683,10 @@ mime@^1.3.4:
   version "1.6.0"
   resolved "https://registry.npmjs.org/mime/-/mime-1.6.0.tgz#32cd9e5c64553bd58d19a568af452acff04981b1"
 
+mine@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/mine/-/mine-0.1.0.tgz#91937531216183d1fce497c01ce0eef61f8e73d3"
+
 minimatch@^3.0.2, minimatch@^3.0.4:
   version "3.0.4"
   resolved "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
@@ -2521,6 +2525,10 @@ utility@^1.12.0, utility@^1.8.0:
     escape-html "~1.0.3"
     mkdirp "~0.5.1"
     mz "~2.7.0"
+
+validator@^10.7.1:
+  version "10.7.1"
+  resolved "https://registry.npmjs.org/validator/-/validator-10.7.1.tgz#dd4cc750c2134ce4a15a2acfc7b233669d659c5b"
 
 wide-align@^1.1.0:
   version "1.1.3"

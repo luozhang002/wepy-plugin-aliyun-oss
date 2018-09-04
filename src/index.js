@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import Utils from "./utils/index";
 import OssDriver from "./driver/oss";
+const validator = require("validator");
 
 export default class CloudStorage {
   constructor(options = {}) {
@@ -9,6 +10,7 @@ export default class CloudStorage {
 
     this.options.config = Object.assign(
       {
+        limit: 1024,
         prefix: "cdn-wxapp",
         debugMode: true,
         time: true,
@@ -23,21 +25,85 @@ export default class CloudStorage {
   }
 
   apply(op) {
+    const { code, file } = op;
+    const config = this.options.config;
+    const { debugMode, lessRootpath } = config;
     const _this = this;
-    const { code, type } = op;
+    if (debugMode) {
+      console.log("\nwepy-plugin-image file:", file);
+      console.log("lessRootpath", lessRootpath);
+    }
 
-    if ((type === "wxml" || type === "css" || type === "page") && code) {
-      const reg = /(\.{0,2}(\"|\'))+(\S+)\.(png|jpg|jpeg|gif|bmp|webp)/gi;
-      const images = code.match(reg) || [];
-      images.map(image => {
-        try {
-          image = image.replace(/(\"|\')/, "");
-          if (!/http[s]{0,1}/.test(image)) {
-            const remotePath = _this.options.config.prefix + image;
-            const localFile = path.join(process.cwd(), "src", image);
+    const reg = /url\((.*?)\)/gi;
+    if (!code) {
+      if (debugMode) {
+        console.error("code is null");
+      }
+      op.next();
+    } else {
+      const bgPaths = code.match(reg) || [];
+      if (debugMode) {
+        console.log("wepy-plugin-aliyun-oss bgPaths:\n", bgPaths);
+      }
 
+      const base64List = [];
+      const uploadList = [];
+      console.log(bgPaths);
+      // op.next()
+      bgPaths.forEach(item => {
+        const bgImage = item
+          .replace(/'/g, "")
+          .replace(/"/g, "")
+          .replace("url(", "")
+          .replace(/\)$/g, "");
+        // 本身是绝对地址
+        let bgPath = bgImage;
+
+        // 绝对地址不存在，使用去除lessRootpath地址的相对地址
+        if (!fs.existsSync(bgPath)) {
+          bgPath = path.join(
+            path.dirname(file.replace("dist", "src")),
+            bgImage.replace(lessRootpath, "")
+          );
+        }
+
+        if (!fs.existsSync(bgPath)) {
+          bgPath = path.join(process.cwd(), "src", bgImage);
+        }
+
+        // less使用e('')传递的路径
+        if (!fs.existsSync(bgPath)) {
+          bgPath = path.join(
+            path.dirname(file.replace("dist", "src")),
+            bgImage
+          );
+        }
+
+        if (!fs.existsSync(bgPath)) {
+          bgPath = path.resolve(path.dirname(file), bgPath);
+        }
+
+        if (debugMode) {
+          console.log("bgPath:", bgPath);
+        }
+
+        if (!fs.existsSync(bgPath) && debugMode) {
+          console.error("%s不存在", bgPath);
+        }
+        if (!validator.isURL(bgImage) && fs.existsSync(bgPath)) {
+          uploadList.push({
+            path: bgPath,
+            bg: bgImage
+          });
+        }
+      });
+
+      const promiseUploadList = [];
+      uploadList.forEach(uploadfile => {
+        promiseUploadList.push(
+          new Promise(resolve => {
             _this.driver
-              .uploader(remotePath, localFile)
+              .uploader(uploadfile.bg, uploadfile.path)
               .then(res => {
                 !_this.options.config.debugMode ||
                   Utils.success(res.original, "上传到CDN响应数据");
@@ -45,9 +111,6 @@ export default class CloudStorage {
                 let newUrl = _this.options.config.time
                   ? res.url + "?t=" + new Date().getTime()
                   : res.url;
-
-                op.code = op.code.replace(image, newUrl);
-                op.next();
 
                 Utils.success(image + " ----> " + newUrl, "上传到CDN成功");
 
@@ -59,14 +122,43 @@ export default class CloudStorage {
 
                     err || Utils.success(image, "删除dist图片成功");
                   });
+                resolve([
+                  {
+                    ...uploadfile,
+                    uploadUrl: newUrl
+                  }
+                ]);
               })
-              .catch(e => Utils.error(e, "上传到CDN失败"));
-          }
-        } catch (e) {
-          Utils.error(e, "上传失败");
-        }
+              .catch(e => {
+                Utils.error(e, "上传到CDN失败");
+                resolve([]);
+              });
+          })
+        );
       });
+      // 无图片的时候
+      if (!promiseUploadList.length) {
+        if (debugMode) {
+          console.log("wepy-plugin-image no upload image");
+        }
+        op.next();
+        return;
+      }
+      Promise.all(promiseUploadList)
+        .then(resultList => {
+          console.log(resultList, "result");
+          resultList.forEach(item => {
+            const bgUrl = item.options.bg;
+            const uploadUrl = item.url.replace("http://", "https://");
+            console.log(bgUrl, uploadUrl);
+            op.code = op.code.replace(bgUrl, uploadUrl);
+          });
+          console.log(resultList);
+          op.next();
+        })
+        .catch(e => {
+          console.log(e);
+        });
     }
-    op.next();
   }
 }
