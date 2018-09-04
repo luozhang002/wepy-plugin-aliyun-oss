@@ -34,7 +34,7 @@ export default class CloudStorage {
       console.log("lessRootpath", lessRootpath);
     }
 
-    const reg = /\/assets\S+(.png|jpeg)/gi;
+    const reg = /\/assets\/\S+(.png|jpeg)/gi;
     if (!code) {
       if (debugMode) {
         console.error("code is null");
@@ -103,7 +103,7 @@ export default class CloudStorage {
         promiseUploadList.push(
           new Promise(resolve => {
             _this.driver
-              .uploader(uploadfile.bg.replace(/\//, ""), uploadfile.path)
+              .uploader(uploadfile.bg.replace(/\//g, "_"), uploadfile.path)
               .then(res => {
                 const image = uploadfile.bg;
                 !_this.options.config.debugMode ||
@@ -152,8 +152,7 @@ export default class CloudStorage {
               "http://",
               "https://"
             );
-            console.log(bgUrl, uploadUrl);
-            op.code = op.code.replace(bgUrl, uploadUrl);
+            op.code = op.code.replace(new RegExp(bgUrl, "gi"), uploadUrl);
           });
           console.log(resultList);
           op.next();
