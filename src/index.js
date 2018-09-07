@@ -48,7 +48,6 @@ export default class CloudStorage {
 
       const base64List = [];
       const uploadList = [];
-      console.log(bgPaths);
       // op.next()
       bgPaths.forEach(item => {
         const bgImage = item
@@ -145,7 +144,6 @@ export default class CloudStorage {
       }
       Promise.all(promiseUploadList)
         .then(resultList => {
-          console.log(resultList, "result");
           resultList.forEach(item => {
             const bgUrl = item.bg;
             const uploadUrl = (item.uploadUrl || "").replace(
@@ -154,7 +152,6 @@ export default class CloudStorage {
             );
             op.code = op.code.replace(new RegExp(bgUrl, "gi"), uploadUrl);
           });
-          console.log(resultList);
           op.next();
         })
         .catch(e => {
