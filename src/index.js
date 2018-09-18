@@ -34,7 +34,7 @@ export default class CloudStorage {
       console.log("lessRootpath", lessRootpath);
     }
 
-    const reg = /\/assets\/\S+(.png|jpeg)/gi;
+    const reg = /\/assets\/\S+(.png|.jpeg|.svg|.jpg)/gi;
     if (!code) {
       if (debugMode) {
         console.error("code is null");
