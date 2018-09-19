@@ -70,6 +70,11 @@ export default class CloudStorage {
           bgPath = path.join(process.cwd(), bgImage);
         }
 
+        if (!fs.existsSync(bgPath)) {
+          bgImage = bgImage.replace(/.svg/, ".png");
+          bgPath = path.join(process.cwd(), bgImage);
+        }
+
         // less使用e('')传递的路径
         if (!fs.existsSync(bgPath)) {
           bgPath = path.join(
