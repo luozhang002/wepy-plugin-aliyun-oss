@@ -51,21 +51,9 @@ export default class CloudStorage {
       // op.next()
       bgPaths.forEach(item => {
         const bgImage = item
-          .replace(/'/g, "")
-          .replace(/"/g, "")
-          .replace("url(", "")
-          .replace(/\)$/g, "");
         // 本身是绝对地址
         let bgPath = bgImage;
         let bgName = bgImage;
-
-        // 绝对地址不存在，使用去除lessRootpath地址的相对地址
-        if (!fs.existsSync(bgPath)) {
-          bgPath = path.join(
-            path.dirname(file.replace("dist", "src")),
-            bgImage.replace(lessRootpath, "")
-          );
-        }
 
         if (!fs.existsSync(bgPath)) {
           bgPath = path.join(process.cwd(), bgImage);
@@ -73,19 +61,8 @@ export default class CloudStorage {
 
         if (!fs.existsSync(bgPath)) {
           bgName = bgImage.replace(/.svg/, ".png");
-          bgPath = path.join(process.cwd(), bgImage);
-        }
-
-        // less使用e('')传递的路径
-        if (!fs.existsSync(bgPath)) {
-          bgPath = path.join(
-            path.dirname(file.replace("dist", "src")),
-            bgImage
-          );
-        }
-
-        if (!fs.existsSync(bgPath)) {
-          bgPath = path.resolve(path.dirname(file), bgPath);
+          bgPath = path.join(process.cwd(), bgName);
+          console.log(bgPath,'4444')
         }
 
         if (debugMode) {
