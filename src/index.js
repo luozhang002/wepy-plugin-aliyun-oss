@@ -57,6 +57,7 @@ export default class CloudStorage {
           .replace(/\)$/g, "");
         // 本身是绝对地址
         let bgPath = bgImage;
+        let bgName = bgImage;
 
         // 绝对地址不存在，使用去除lessRootpath地址的相对地址
         if (!fs.existsSync(bgPath)) {
@@ -71,7 +72,7 @@ export default class CloudStorage {
         }
 
         if (!fs.existsSync(bgPath)) {
-          bgImage = bgImage.replace(/.svg/, ".png");
+          bgName = bgImage.replace(/.svg/, ".png");
           bgPath = path.join(process.cwd(), bgImage);
         }
 
@@ -97,7 +98,8 @@ export default class CloudStorage {
         if (!validator.isURL(bgImage) && fs.existsSync(bgPath)) {
           uploadList.push({
             path: bgPath,
-            bg: bgImage
+            bg: bgImage,
+            bgName: bgName
           });
         }
       });
@@ -107,7 +109,7 @@ export default class CloudStorage {
         promiseUploadList.push(
           new Promise(resolve => {
             _this.driver
-              .uploader(uploadfile.bg.replace(/\//g, "_"), uploadfile.path)
+              .uploader(uploadfile.bgName.replace(/\//g, "_"), uploadfile.path)
               .then(res => {
                 const image = uploadfile.bg;
                 !_this.options.config.debugMode ||
