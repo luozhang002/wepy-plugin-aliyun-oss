@@ -43,10 +43,7 @@ export default class OssDriver {
           .then(res => {
             let url = res.url;
             if (this.options.oss.static) {
-              url = res.url.replace(
-                this.options.oss.endpoint,
-                this.options.oss.static
-              );
+              url = res.url.replace(/^https:\S+.com/, this.options.oss.static);
             }
             resolve(Utils.responeCdn(url, res));
           })
