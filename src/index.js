@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import md5File from 'md5-file';
 import Utils from "./utils/index";
 import OssDriver from "./driver/oss";
 const validator = require("validator");
@@ -50,7 +51,7 @@ export default class CloudStorage {
       const uploadList = [];
       // op.next()
       bgPaths.forEach(item => {
-        const bgImage = item
+        const bgImage = item;
         // 本身是绝对地址
         let bgPath = bgImage;
         let bgName = bgImage;
@@ -62,7 +63,7 @@ export default class CloudStorage {
         if (!fs.existsSync(bgPath)) {
           bgName = bgImage.replace(/.svg/, ".png");
           bgPath = path.join(process.cwd(), bgName);
-          console.log(bgPath,'4444')
+          console.log(bgPath, "4444");
         }
 
         if (debugMode) {
@@ -73,10 +74,11 @@ export default class CloudStorage {
           console.error("%s不存在", bgPath);
         }
         if (!validator.isURL(bgImage) && fs.existsSync(bgPath)) {
+          bgName = md5File.sync(bgPath)
           uploadList.push({
             path: bgPath,
             bg: bgImage,
-            bgName: bgName
+            bgName
           });
         }
       });
